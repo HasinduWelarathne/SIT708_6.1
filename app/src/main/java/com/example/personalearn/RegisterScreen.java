@@ -11,18 +11,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -69,7 +66,7 @@ public class RegisterScreen extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SignUpUser();
+                signUpUser();
             }
         });
 
@@ -99,11 +96,10 @@ public class RegisterScreen extends AppCompatActivity {
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
-//            userPhoto.setImageURI(imageUri);
         }
     }
 
-    private void SignUpUser(){
+    private void signUpUser(){
         String emailAdd = email.getText().toString().trim();
         String pass = password.getText().toString().trim();
 

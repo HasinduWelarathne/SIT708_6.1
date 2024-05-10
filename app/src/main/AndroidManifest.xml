@@ -17,6 +17,9 @@
         android:theme="@style/Theme.PersonaLearn"
         tools:targetApi="31">
         <activity
+            android:name=".ResultScreen"
+            android:exported="false" />
+        <activity
             android:name=".QuizScreen"
             android:exported="false" />
         <activity

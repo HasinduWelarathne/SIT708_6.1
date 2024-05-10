@@ -7,31 +7,30 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
+import retrofit2.http.Query;
 
 public class QuizScreen extends AppCompatActivity {
+
     public interface MyApiService {
-        @GET("api.php?amount=5&type=multiple")
-        Call<com.example.personalearn.QuizQueDataModel> getDataModel();
+        @GET("api.php?amount=3&type=multiple")
+        Call<QuizQueDataModel> getQuizData(@Query("category") int categoryId);
     }
 
     private TextView questionText, questionNumber, scoreSummary;
     private ProgressBar progressBar;
     private RadioGroup radioGroupOptions;
     private Button buttonNext, buttonRestart;
-    private List<QuizQuestion> questions;
+    private List<QuizQueDataModel.QuizQuestion> questions;
     private int currentQuestionIndex = 0;
     private int score = 0;
 
@@ -43,9 +42,18 @@ public class QuizScreen extends AppCompatActivity {
         // Initialize UI components
         initializeUI();
 
-        buttonNext.setOnClickListener(v -> handleNextButtonClick());
+        buttonNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleNextButtonClick();
+            }
+        });
 
-        loadQuizData();
+        // Retrieve category ID from Intent
+        int categoryId = getIntent().getIntExtra("CategoryID", -1);
+
+        // Load quiz data based on category ID
+        loadQuizData(categoryId);
     }
 
     private void initializeUI() {
@@ -57,7 +65,12 @@ public class QuizScreen extends AppCompatActivity {
         scoreSummary = findViewById(R.id.scoreSummary);
         buttonRestart = findViewById(R.id.restartButton);
 
-        buttonRestart.setOnClickListener(v -> finish());
+        buttonRestart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
     }
 
     private void handleNextButtonClick() {
@@ -76,7 +89,7 @@ public class QuizScreen extends AppCompatActivity {
         }
     }
 
-    private void displayQuestion(com.example.personalearn.QuizQuestion question) {
+    private void displayQuestion(QuizQueDataModel.QuizQuestion question) {
         questionText.setText(question.getQuestion());
         questionNumber.setText("Question #" + (currentQuestionIndex + 1));
         radioGroupOptions.removeAllViews();
@@ -106,16 +119,16 @@ public class QuizScreen extends AppCompatActivity {
         buttonRestart.setText("Return to Main Screen");
     }
 
-    private void loadQuizData() {
-        progressBar.setVisibility(View.GONE);
+    private void loadQuizData(int categoryId) {
+        progressBar.setVisibility(View.VISIBLE);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://opentdb.com/")
+                .baseUrl("https://opentdb.com/") // Replace this with your API base URL
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         MyApiService myApiService = retrofit.create(MyApiService.class);
 
-        myApiService.getDataModel().enqueue(new Callback<QuizQueDataModel>() {
+        myApiService.getQuizData(categoryId).enqueue(new Callback<QuizQueDataModel>() {
             @Override
             public void onResponse(Call<QuizQueDataModel> call, Response<QuizQueDataModel> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -130,6 +143,7 @@ public class QuizScreen extends AppCompatActivity {
                     questionText.setText("Failed to load questions. Response Error: " + response.code());
                     buttonNext.setEnabled(false);
                 }
+                progressBar.setVisibility(View.GONE);
             }
             @Override
             public void onFailure(Call<QuizQueDataModel> call, Throwable t) {
